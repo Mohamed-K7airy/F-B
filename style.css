@@ -39,14 +39,12 @@ body.app-page {
     background: #F4F5F7 !important;
     display: block;
     /* override default flex column */
-    height: 100vh;
-    overflow: hidden;
 }
 
 .app-layout {
     display: flex;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 .main-content-wrapper {
@@ -55,13 +53,14 @@ body.app-page {
     flex-direction: column;
     min-width: 0;
     /* Important for flex child truncation */
-    height: 100vh;
+    min-height: 100vh;
     background:
         linear-gradient(135deg, rgba(224, 112, 46, 0.92) 0%, rgba(193, 86, 28, 0.85) 100%),
         url('/bg.jpg') center/cover no-repeat fixed;
     position: relative;
     /* Context for children if needed */
-    padding-bottom: 0;
+    padding-bottom: 150px;
+    /* Space for the floating chat box */
 }
 
 /* --- Main Sidebar (Index Page) --- */
@@ -320,10 +319,8 @@ body.app-page {
     border-bottom-right-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     /* Softer, wider shadow */
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    flex-shrink: 0;
+    position: relative;
+    z-index: 10;
 }
 
 .logo-container {
@@ -754,15 +751,19 @@ body.dark-theme .nav-theme-toggle:hover {
 
 /* Floating Wrapper for the Search Box */
 .floating-search-wrapper {
-    position: relative;
+    position: fixed;
+    bottom: 0;
+    left: 280px;
+    /* Default sidebar width */
+    right: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 0 20px 25px 20px;
     background: transparent;
     z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
-    flex-shrink: 0;
     /* Let clicks pass through background */
 }
 
@@ -770,12 +771,19 @@ body.dark-theme .floating-search-wrapper {
     background: transparent;
 }
 
+/* Ensure the collapsed sidebar changes the wrapper left offset */
+@media (min-width: 769px) {
+    body:has(.main-sidebar.collapsed) .floating-search-wrapper {
+        left: 68px;
+    }
+}
+
 /* Search Container — Premium Card Style */
 .search-container {
     background-color: #FFFFFF !important;
     border: 1px solid rgba(0, 0, 0, 0.12);
     width: 100%;
-    max-width: 800px;
+    max-width: 760px;
     border-radius: 24px;
     display: flex;
     flex-direction: column;
@@ -952,6 +960,7 @@ body.dark-theme .floating-search-wrapper {
 
 @media (max-width: 768px) {
     .floating-search-wrapper {
+        left: 0;
         padding: 0 15px 15px 15px;
     }
 
@@ -961,7 +970,7 @@ body.dark-theme .floating-search-wrapper {
     }
 
     .main-content-wrapper {
-        padding-bottom: 0;
+        padding-bottom: 120px;
     }
 
     .header {
@@ -1101,6 +1110,7 @@ body.dark-theme .floating-search-wrapper {
     }
 
     .floating-search-wrapper {
+        left: 0;
         padding: 0 15px 15px 15px;
     }
 
@@ -1110,7 +1120,7 @@ body.dark-theme .floating-search-wrapper {
     }
 
     .main-content-wrapper {
-        padding-bottom: 0;
+        padding-bottom: 120px;
     }
 }
 
@@ -1274,18 +1284,10 @@ body.dark-theme .floating-search-wrapper {
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 100px 20px 20px;
-    /* 100px top to clear static header, normal bottom padding */
+    padding: 20px;
     animation: fadeIn 0.4s ease forwards;
-    overflow-y: auto;
-    scrollbar-width: none;
-    /* Hide scrollbar for cleaner look */
-}
-
-.chat-interface::-webkit-scrollbar {
-    display: none;
 }
 
 .chat-messages-wrapper {
@@ -1422,10 +1424,9 @@ body.dark-theme .floating-search-wrapper {
 
 @media (max-width: 768px) {
     .chat-interface {
-        height: auto;
-        flex: 1;
-        padding: 80px 10px 10px;
-        /* Adjust for header top space */
+        height: calc(100vh - 170px);
+        /* Adjust for mobile header/footer */
+        padding: 10px;
     }
 
     .message {
