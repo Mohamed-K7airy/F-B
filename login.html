@@ -367,22 +367,38 @@
             }
         });
 
-        // OAuth Logic
+        // OAuth Logic (Popup mode)
         async function handleOAuth(provider) {
-            const { error } = await supabase.auth.signInWithOAuth({
+            const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: provider,
-                options: {
-                    redirectTo: window.location.origin + '/dashboard.html'
-                }
+                options: { skipBrowserRedirect: true }
             });
 
             if (error) {
                 console.error(`${provider} login error:`, error.message);
-                const errorMsg = document.getElementById('login-error');
-                if (errorMsg) {
-                    errorMsg.textContent = error.message;
-                    errorMsg.style.display = 'block';
-                }
+                return;
+            }
+
+            if (data && data.url) {
+                const popupWidth = 500;
+                const popupHeight = 600;
+                const left = (window.innerWidth - popupWidth) / 2;
+                const top = (window.innerHeight - popupHeight) / 2;
+
+                const popup = window.open(
+                    data.url,
+                    `${provider}-oauth`,
+                    `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`
+                );
+
+                const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+                    if (event === 'SIGNED_IN' || session) {
+                        if (popup && !popup.closed) {
+                            popup.close();
+                        }
+                        window.location.href = 'dashboard.html';
+                    }
+                });
             }
         }
 
