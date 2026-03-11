@@ -398,53 +398,52 @@
                 }
 
                 chatMessages.appendChild(msgDiv);
-                // Auto-scroll the chat
+                // Auto-scroll the chat messages wrapper
                 const scrollWrapper = document.getElementById('chat-interface');
                 scrollWrapper.scrollTop = scrollWrapper.scrollHeight;
             }
 
-            async function handleSend() {
+            function handleSend() {
                 const msg = searchInput.value;
                 if (!msg.trim()) return;
 
-                // 1. Show message in UI
                 if (!isChatActive) {
                     isChatActive = true;
+                    // Add animation class to hero
                     heroSection.classList.add('animate-out');
+
+                    // Wait for animation to finish before switching displays
                     setTimeout(() => {
                         heroSection.style.display = 'none';
                         chatInterface.style.display = 'flex';
+                        searchInput.focus();
+
+                        // Add the user's message
                         addMessage(msg, 'user');
-                    }, 400);
+                        saveMessageToSupabase(msg, 'user');
+                        searchInput.value = '';
+                        autoResize(searchInput);
+
+                        // AI response
+                        setTimeout(() => {
+                            addMessage("قريبا", 'ai');
+                            saveMessageToSupabase("قريبا", 'ai');
+                        }, 500);
+                    }, 400); // 400ms matches the CSS transition duration
                 } else {
                     addMessage(msg, 'user');
-                }
+                    saveMessageToSupabase(msg, 'user');
+                    searchInput.value = '';
+                    autoResize(searchInput);
 
-                searchInput.value = '';
-                autoResize(searchInput);
-
-                // 2. Connect to Flask Backend (app.py)
-                try {
-                    const response = await fetch('http://127.0.0.1:8001/solve', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            question: msg,
-                            user_id: currentUserId 
-                        })
-                    });
-
-                    const result = await response.json();
-                    if (result.success) {
-                        addMessage(result.answer, 'ai');
-                        if (currentUserId) fetchUserData(currentUserId);
-                    } else {
-                        addMessage("Error: " + result.error, 'ai');
-                    }
-                } catch (error) {
-                    addMessage("Make sure your Python server (app.py) is running!", 'ai');
+                    // AI response
+                    setTimeout(() => {
+                        addMessage("قريبا", 'ai');
+                        saveMessageToSupabase("قريبا", 'ai');
+                    }, 500);
                 }
             }
+
             // Event Listeners for Unified Search
             sendBtn.addEventListener('click', handleSend);
             searchInput.addEventListener('keydown', (e) => {
